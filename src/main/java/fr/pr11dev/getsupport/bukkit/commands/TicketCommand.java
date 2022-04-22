@@ -21,7 +21,7 @@ public class TicketCommand implements CommandExecutor {
             }
             else if(args != null && args[0].equalsIgnoreCase("list")) {
                 if(sender.hasPermission("gs.list.all")) {
-                    if(Data.tickets != null && Data.tickets.size() > 0) {
+                    if(Data.tickets != null && !Data.tickets.isEmpty() && Data.tickets.size() > 0) {
                         sender.sendMessage("§c[§6GetSupport§c] §7Liste des tickets");
                         for(Ticket t : Data.tickets) {
                             sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + t.getTicketId() + "§7 Demandeur: §e" + t.getPlayer().getDisplayName()+"§7 Claim: §e"+t.isClaimed()+"§7 Ouverture: §e"+t.getFormattedCaseTime());
@@ -51,17 +51,19 @@ public class TicketCommand implements CommandExecutor {
             else if(args != null && args[0].equalsIgnoreCase("close")) {
                 if(args.length >= 2) {
                     if(sender.hasPermission("gs.close.other")) {
-                        if(CustomPlayerManager.getCustomPlayer(args[1]) != null && CustomPlayerManager.getCustomPlayer(args[1]).getTickets() != null &&!CustomPlayerManager.getCustomPlayer(args[1]).getTickets().isEmpty()) {
+                        if(CustomPlayerManager.getCustomPlayer(args[1]) != null && CustomPlayerManager.getCustomPlayer(args[1]).getTickets() != null ) {
                             final CustomPlayer p = CustomPlayerManager.getCustomPlayer(args[1]);
                             if(p.getTickets().size() == 1) {
                                 sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + p.getFirstTicket().getTicketId() + "§7 fermé");
                                 p.getFirstTicket().close();
+                                p.removeTicket(p.getFirstTicket());
                             }
                             else if (p.getTickets().size() >= 2){
                                 if(args.length == 3 && args[2].length() == 1 && parseInt(args[2]) != 0) {
                                     final int ticket = parseInt(args[2]) - 1;
                                     sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + p.getTickets().get(ticket).getTicketId() + "§7 fermé");
                                     p.getTickets().get(ticket).close();
+                                    p.removeTicket(p.getTickets().get(ticket));
                                 }
                                 else {
                                     sender.sendMessage("§c[§6GetSupport§c] §7Veuillez entrer le numéro de ticket à fermer (ou en entrer un)");
@@ -69,7 +71,7 @@ public class TicketCommand implements CommandExecutor {
                             }
                         }
                         else {
-                            sender.sendMessage("§c[§6GetSupport§c] §7Vous n'avez aucun ticket");
+                            sender.sendMessage("§c[§6GetSupport§c] §7Ce joueur n'a aucun ticket "+args[1]);
                         }
                     }
                     else {
@@ -79,18 +81,20 @@ public class TicketCommand implements CommandExecutor {
                 else {
                     if(sender.hasPermission("gs.close")) {
                         if(Data.tickets != null && Data.tickets.size() > 0) {
-                            if(CustomPlayerManager.getCustomPlayerFromSender(sender) != null && CustomPlayerManager.getCustomPlayerFromSender(sender).getTickets() != null &&!CustomPlayerManager.getCustomPlayerFromSender(sender).getTickets().isEmpty()) {
+                            if(CustomPlayerManager.getCustomPlayerFromSender(sender) != null && CustomPlayerManager.getCustomPlayerFromSender(sender).getTickets() != null) {
                                 final CustomPlayer p = CustomPlayerManager.getCustomPlayerFromSender(sender);
                                 if(p.getTickets().size() == 1) {
                                     sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + p.getFirstTicket().getTicketId() + "§7 fermé");
                                     p.getFirstTicket().close();
+                                    p.removeTicket(p.getFirstTicket());
                                 }
                                 else if(p.getTickets().size() >= 2) {
                                     if(args.length == 3) {
                                         if(args[2].length() == 1 && parseInt(args[2]) != 0) {
-                                            int ticket = parseInt(args[2]) - 1;
-                                            sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + p.getTickets().get(ticket).getTicketId() + "§7 fermé");
-                                            p.getTickets().get(ticket).close();
+                                            final Ticket t = p.getTickets().get(parseInt(args[2]) - 1);
+                                            sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + t.getTicketId() + "§7 fermé");
+                                            t.close();
+                                            CustomPlayerManager.getCustomPlayerFromSender(sender).removeTicket(t);
                                         }
                                         else {
                                             sender.sendMessage("§c[§6GetSupport§c] §7Veuillez entrer un numéro de ticket valide");
@@ -117,22 +121,35 @@ public class TicketCommand implements CommandExecutor {
                 }
             }
             else if(args != null && args[0].equalsIgnoreCase("claim")) {
-                if(args.length == 2) {
+                if(args.length >= 2) {
                     if(sender.hasPermission("gs.claim")) {
-                        if(Data.tickets != null && Data.tickets.size() > 0) {
-                            for(Ticket t : Data.tickets) {
-                                if(t.getPlayer().getName().equalsIgnoreCase(args[1])) {
+                        if(CustomPlayerManager.getCustomPlayer(args[1]) != null && CustomPlayerManager.getCustomPlayer(args[1]).getTickets() != null) {
+                            final CustomPlayer p = CustomPlayerManager.getCustomPlayer(args[1]);
+                            if(args.length >= 3) {
+                                if(args[2].length() == 1 && parseInt(args[2]) != 0) {
+                                    final Ticket t = p.getTickets().get(parseInt(args[2]) - 1);
                                     if(!t.isClaimed()) {
                                         t.claim((Player) sender);
-                                        sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + t.getTicketId() + "§7 Claimé");
+                                        sender.sendMessage("§c[§6GetSupport§c] §7Le Ticket §e" + t.getTicketId() + "§7 a été claimé");
+                                        sender.sendMessage("§c[§6GetSupport§c] §e" + t.getPlayer().getName() + "§7 est le demandeur de ce ticket");
+                                        sender.sendMessage("§c[§6GetSupport§c] §7Message: " + t.getMessage());
                                         return false;
-                                    }
-                                    else {
-                                        sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + t.getTicketId() + "§7 déjà claimé");
                                     }
                                 }
                             }
-                            sender.sendMessage("§c[§6GetSupport§c] §7Aucun ticket trouvé pour §e" + args[1]);
+                            else {
+                                final Ticket t = p.getFirstTicket();
+                                if(!t.isClaimed()) {
+                                    t.claim((Player) sender);
+                                    sender.sendMessage("§c[§6GetSupport§c] §7Le Ticket §e" + t.getTicketId() + "§7 a été claimé");
+                                    sender.sendMessage("§c[§6GetSupport§c] §e" + t.getPlayer().getName() + "§7 est le demandeur de ce ticket");
+                                    sender.sendMessage("§c[§6GetSupport§c] §7Message: " + t.getMessage());
+                                    return false;
+                                }
+                                else{
+                                    sender.sendMessage("§c[§6GetSupport§c] §7Le ticket §e" + t.getTicketId() + "§7 est déjà claimé");
+                                }
+                            }
                         }
                         else {
                             sender.sendMessage("§c[§6GetSupport§c] §7Aucun ticket n'est ouvert");
@@ -147,7 +164,9 @@ public class TicketCommand implements CommandExecutor {
                         Ticket t = Data.tickets.get(0);
                         if(!t.isClaimed()) {
                             t.claim((Player) sender);
-                            sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + t.getTicketId() + "§7 Claimé");
+                            sender.sendMessage("§c[§6GetSupport§c] §7Le Ticket §e" + t.getTicketId() + "§7 a été claimé");
+                            sender.sendMessage("§c[§6GetSupport§c] §e" + t.getPlayer().getName() + "§7 est le demandeur de ce ticket");
+                            sender.sendMessage("§c[§6GetSupport§c] §7Message: " + t.getMessage());
                         }
                         else {
                             sender.sendMessage("§c[§6GetSupport§c] §7Le ticket §e" + t.getTicketId() + "§7 est déjà claimé");
@@ -160,10 +179,15 @@ public class TicketCommand implements CommandExecutor {
             }
             else if(args != null && args[0].equalsIgnoreCase("create")) {
                 if(sender.hasPermission("gs.create")) {
-                    Ticket newTicket = new Ticket((Player) sender, args[1]);
+                    String message = "";
+                    for(int i = 1; i < args.length; ++i) {
+                        message = message + args[i] + " ";
+                    }
+                    Ticket newTicket = new Ticket((Player) sender, message);
                     Data.tickets.add(newTicket);
                     sender.sendMessage("§c[§6GetSupport§c] §7Ticket "+newTicket.getTicketId()+"§7 créé");
                     AlertStaff.alert(newTicket);
+                    CustomPlayerManager.getCustomPlayerFromSender(sender).addTicket(newTicket);
                 }
                 else {
                     sender.sendMessage("§c[§6GetSupport§c] §7Vous n'avez pas la permission de créer un ticket");
@@ -171,10 +195,15 @@ public class TicketCommand implements CommandExecutor {
             }
             else if(args != null) {
                 if(sender.hasPermission("gs.create")) {
-                    Ticket newTicket = new Ticket((Player) sender, args[0]);
+                    String message = "";
+                    for(int i = 1; i < args.length; ++i) {
+                        message = message + args[i] + " ";
+                    }
+                    Ticket newTicket = new Ticket((Player) sender, message);
                     Data.tickets.add(newTicket);
                     sender.sendMessage("§c[§6GetSupport§c] §7Ticket "+newTicket.getTicketId()+"§7 créé");
                     AlertStaff.alert(newTicket);
+                    CustomPlayerManager.getCustomPlayerFromSender(sender).addTicket(newTicket);
                 }
                 else {
                     sender.sendMessage("§c[§6GetSupport§c] §7Vous n'avez pas la permission de créer un ticket");

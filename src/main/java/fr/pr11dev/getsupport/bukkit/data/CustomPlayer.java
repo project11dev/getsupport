@@ -18,7 +18,7 @@ public class CustomPlayer {
     }
 
     public Ticket getFirstTicket() {
-        if(t != null) {
+        if(t != null && !t.isEmpty()) {
             return t.get(0);
         }
         return null;
@@ -30,5 +30,9 @@ public class CustomPlayer {
 
     public void addTicket(Ticket t) {
         this.t.add(t);
+    }
+
+    public void removeTicket(Ticket t) {
+        this.t.remove(t);
     }
 }

@@ -65,6 +65,7 @@ public class Ticket {
         this.operator = null;
         this.player = null;
         this.claimed = false;
+        Data.tickets.remove(this);
     }
 
         private Player player;
