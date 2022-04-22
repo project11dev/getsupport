@@ -6,8 +6,8 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.Plugin;
 
 public class Commands {
-    public void register() {
-        Plugin p = Bukkit.getPluginManager().getPlugin("GetSupport");
+    public static void register() {
+        Plugin p = Bukkit.getPluginManager().getPlugin("getsupport");
 
         PluginCommand pTicket = p.getServer().getPluginCommand("ticket");
         pTicket.setExecutor(new TicketCommand());

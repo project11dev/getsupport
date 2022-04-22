@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Ticket {
     public Ticket(Player player, String message) {
@@ -33,7 +34,7 @@ public class Ticket {
     }
 
     public String getFormattedCaseTime() {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(caseOpeningTime);
+        return caseOpeningTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
     public LocalDateTime getClaimedTime() {
@@ -41,7 +42,7 @@ public class Ticket {
     }
 
     public String getFormattedClaimedTime() {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(claimedTime);
+        return claimedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
     public Player getOperator() {

@@ -1,6 +1,6 @@
 name: getsupport
 version: '${project.version}'
-main: fr.pr11dev.getsupport
+main: fr.pr11dev.getsupport.bukkit.getsupport
 author: pr11dev
 commands:
   ticket:
