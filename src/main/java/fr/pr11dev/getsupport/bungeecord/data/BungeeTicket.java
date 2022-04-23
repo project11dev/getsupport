@@ -1,13 +1,12 @@
-package fr.pr11dev.getsupport.bukkit.data;
+package fr.pr11dev.getsupport.bungeecord.data;
 
-import org.bukkit.entity.Player;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class Ticket {
-    public Ticket(Player player, String message) {
+public class BungeeTicket {
+    public BungeeTicket(ProxiedPlayer player, String message) {
         this.player = player;
         this.message = message;
         this.claimed = false;
@@ -15,13 +14,13 @@ public class Ticket {
         this.ticket_id = "ticket_"+player.getUniqueId().toString()+"_"+getFormattedCaseTime();
     }
 
-    public void claim(Player player) {
+    public void claim(ProxiedPlayer player) {
         this.operator = player;
         this.claimed = true;
         this.claimedTime = LocalDateTime.now();
     }
 
-    public Player getPlayer() {
+    public ProxiedPlayer getPlayer() {
         return player;
     }
 
@@ -45,7 +44,7 @@ public class Ticket {
         return claimedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
-    public Player getOperator() {
+    public ProxiedPlayer getOperator() {
         return operator;
     }
 
@@ -69,11 +68,11 @@ public class Ticket {
     }
 
 
-        private Player player;
-        private String message;
-        private LocalDateTime caseOpeningTime;
-        private LocalDateTime claimedTime;
-        private Player operator;
-        private boolean claimed;
-        private String ticket_id;
+    private ProxiedPlayer player;
+    private String message;
+    private LocalDateTime caseOpeningTime;
+    private LocalDateTime claimedTime;
+    private ProxiedPlayer operator;
+    private boolean claimed;
+    private String ticket_id;
 }

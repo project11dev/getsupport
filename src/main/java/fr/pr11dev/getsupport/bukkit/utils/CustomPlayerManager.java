@@ -43,7 +43,6 @@ public class CustomPlayerManager {
     }
 
     public static CustomPlayer getCustomPlayerFromSender(CommandSender sender){
-        System.out.println(sender.getName());
         return getCustomPlayer(sender.getName());
     }
 
