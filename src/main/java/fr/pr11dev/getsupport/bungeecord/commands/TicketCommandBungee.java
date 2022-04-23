@@ -64,7 +64,6 @@ public class TicketCommandBungee extends Command {
                                 sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + p.getFirstTicket().getTicketId() + "§7 fermé");
                                 ProxyServer.getInstance().getPluginManager().callEvent(new BungeeTicketClosedEvent(p.getFirstTicket()));
                                 p.getFirstTicket().close();
-                                p.removeTicket(p.getFirstTicket());
                             }
                             else if (p.getTickets().size() >= 2){
                                 if(args.length == 3 && args[2].length() == 1 && parseInt(args[2]) != 0) {
@@ -72,7 +71,6 @@ public class TicketCommandBungee extends Command {
                                     sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + p.getTickets().get(ticket).getTicketId() + "§7 fermé");
                                     ProxyServer.getInstance().getPluginManager().callEvent(new BungeeTicketClosedEvent(p.getTickets().get(ticket)));
                                     p.getTickets().get(ticket).close();
-                                    p.removeTicket(p.getTickets().get(ticket));
                                 }
                                 else {
                                     sender.sendMessage("§c[§6GetSupport§c] §7Veuillez entrer le numéro de ticket à fermer (ou en entrer un)");
@@ -96,7 +94,6 @@ public class TicketCommandBungee extends Command {
                                     sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + p.getFirstTicket().getTicketId() + "§7 fermé");
                                     ProxyServer.getInstance().getPluginManager().callEvent(new BungeeTicketClosedEvent(p.getFirstTicket()));
                                     p.getFirstTicket().close();
-                                    p.removeTicket(p.getFirstTicket());
                                 }
                                 else if(p.getTickets().size() >= 2) {
                                     if(args.length == 3) {
@@ -105,7 +102,6 @@ public class TicketCommandBungee extends Command {
                                             sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + t.getTicketId() + "§7 fermé");
                                             ProxyServer.getInstance().getPluginManager().callEvent(new BungeeTicketClosedEvent(t));
                                             t.close();
-                                            CustomProxiedPlayerManager.getCustomPlayerFromSender(sender).removeTicket(t);
                                         }
                                         else {
                                             sender.sendMessage("§c[§6GetSupport§c] §7Veuillez entrer un numéro de ticket valide");
@@ -194,10 +190,8 @@ public class TicketCommandBungee extends Command {
                         message = message + args[i] + " ";
                     }
                     BungeeTicket newTicket = new BungeeTicket((ProxiedPlayer) sender, message);
-                    Data.tickets.add(newTicket);
                     sender.sendMessage("§c[§6GetSupport§c] §7Ticket "+newTicket.getTicketId()+"§7 créé");
                     AlertStaffBungee.alert(newTicket);
-                    CustomProxiedPlayerManager.getCustomPlayerFromSender(sender).addTicket(newTicket);
                     ProxyServer.getInstance().getPluginManager().callEvent(new BungeeTicketCreatedEvent(newTicket));
                 }
                 else {
@@ -211,10 +205,8 @@ public class TicketCommandBungee extends Command {
                         message = message + args[i] + " ";
                     }
                     BungeeTicket newTicket = new BungeeTicket((ProxiedPlayer) sender, message);
-                    Data.tickets.add(newTicket);
                     sender.sendMessage("§c[§6GetSupport§c] §7Ticket "+newTicket.getTicketId()+"§7 créé");
                     AlertStaffBungee.alert(newTicket);
-                    CustomProxiedPlayerManager.getCustomPlayerFromSender(sender).addTicket(newTicket);
                     ProxyServer.getInstance().getPluginManager().callEvent(new BungeeTicketCreatedEvent(newTicket));
                 }
                 else {

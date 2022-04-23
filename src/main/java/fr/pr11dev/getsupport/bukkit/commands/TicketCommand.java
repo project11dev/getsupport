@@ -61,7 +61,6 @@ public class TicketCommand implements CommandExecutor {
                                 sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + p.getFirstTicket().getTicketId() + "§7 fermé");
                                 getPluginManager().callEvent(new TicketClosedEvent(p.getFirstTicket()));
                                 p.getFirstTicket().close();
-                                p.removeTicket(p.getFirstTicket());
                             }
                             else if (p.getTickets().size() >= 2){
                                 if(args.length == 3 && args[2].length() == 1 && parseInt(args[2]) != 0) {
@@ -69,7 +68,6 @@ public class TicketCommand implements CommandExecutor {
                                     sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + p.getTickets().get(ticket).getTicketId() + "§7 fermé");
                                     getPluginManager().callEvent(new TicketClosedEvent(p.getTickets().get(ticket)));
                                     p.getTickets().get(ticket).close();
-                                    p.removeTicket(p.getTickets().get(ticket));
                                 }
                                 else {
                                     sender.sendMessage("§c[§6GetSupport§c] §7Veuillez entrer le numéro de ticket à fermer (ou en entrer un)");
@@ -93,7 +91,6 @@ public class TicketCommand implements CommandExecutor {
                                     sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + p.getFirstTicket().getTicketId() + "§7 fermé");
                                     getPluginManager().callEvent(new TicketClosedEvent(p.getFirstTicket()));
                                     p.getFirstTicket().close();
-                                    p.removeTicket(p.getFirstTicket());
                                 }
                                 else if(p.getTickets().size() >= 2) {
                                     if(args.length == 3) {
@@ -102,7 +99,6 @@ public class TicketCommand implements CommandExecutor {
                                             sender.sendMessage("§c[§6GetSupport§c] §7Ticket §e" + t.getTicketId() + "§7 fermé");
                                             getPluginManager().callEvent(new TicketClosedEvent(t));
                                             t.close();
-                                            CustomPlayerManager.getCustomPlayerFromSender(sender).removeTicket(t);
                                         }
                                         else {
                                             sender.sendMessage("§c[§6GetSupport§c] §7Veuillez entrer un numéro de ticket valide");
@@ -191,10 +187,8 @@ public class TicketCommand implements CommandExecutor {
                         message = message + args[i] + " ";
                     }
                     Ticket newTicket = new Ticket((Player) sender, message);
-                    Data.tickets.add(newTicket);
                     sender.sendMessage("§c[§6GetSupport§c] §7Ticket "+newTicket.getTicketId()+"§7 créé");
                     AlertStaff.alert(newTicket);
-                    CustomPlayerManager.getCustomPlayerFromSender(sender).addTicket(newTicket);
                     getPluginManager().callEvent(new TicketCreatedEvent(newTicket));
                 }
                 else {
@@ -208,10 +202,8 @@ public class TicketCommand implements CommandExecutor {
                         message = message + args[i] + " ";
                     }
                     Ticket newTicket = new Ticket((Player) sender, message);
-                    Data.tickets.add(newTicket);
                     sender.sendMessage("§c[§6GetSupport§c] §7Ticket "+newTicket.getTicketId()+"§7 créé");
                     AlertStaff.alert(newTicket);
-                    CustomPlayerManager.getCustomPlayerFromSender(sender).addTicket(newTicket);
                     getPluginManager().callEvent(new TicketCreatedEvent(newTicket));
                 }
                 else {

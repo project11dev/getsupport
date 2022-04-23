@@ -1,5 +1,6 @@
 package fr.pr11dev.getsupport.bukkit.data;
 
+import fr.pr11dev.getsupport.bukkit.utils.CustomPlayerManager;
 import org.bukkit.entity.Player;
 
 import java.text.SimpleDateFormat;
@@ -7,16 +8,18 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Ticket {
-    public Ticket(Player player, String message) {
-        this.player = player;
-        this.message = message;
+    public Ticket(Player asker, String request) {
+        this.player = asker;
+        this.message = request;
         this.claimed = false;
         this.caseOpeningTime = LocalDateTime.now();
         this.ticket_id = "ticket_"+player.getUniqueId().toString()+"_"+getFormattedCaseTime();
+        Data.tickets.add(this);
+        CustomPlayerManager.getCustomPlayerFromPlayer(asker).addTicket(this);
     }
 
-    public void claim(Player player) {
-        this.operator = player;
+    public void claim(Player operator) {
+        this.operator = operator;
         this.claimed = true;
         this.claimedTime = LocalDateTime.now();
     }
@@ -59,6 +62,7 @@ public class Ticket {
 
 
     public void close() {
+        CustomPlayerManager.getCustomPlayerFromSender(player).removeTicket(this);
         this.claimedTime = null;
         this.message = null;
         this.caseOpeningTime = null;

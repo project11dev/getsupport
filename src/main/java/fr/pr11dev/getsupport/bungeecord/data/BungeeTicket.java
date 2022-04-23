@@ -1,21 +1,24 @@
 package fr.pr11dev.getsupport.bungeecord.data;
 
+import fr.pr11dev.getsupport.bungeecord.utils.CustomProxiedPlayerManager;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class BungeeTicket {
-    public BungeeTicket(ProxiedPlayer player, String message) {
-        this.player = player;
-        this.message = message;
+    public BungeeTicket(ProxiedPlayer demander, String request) {
+        this.player = demander;
+        this.message = request;
         this.claimed = false;
         this.caseOpeningTime = LocalDateTime.now();
         this.ticket_id = "ticket_"+player.getUniqueId().toString()+"_"+getFormattedCaseTime();
+        Data.tickets.add(this);
+        CustomProxiedPlayerManager.getCustomPlayerFromPlayer(demander).addTicket(this);
     }
 
-    public void claim(ProxiedPlayer player) {
-        this.operator = player;
+    public void claim(ProxiedPlayer operator) {
+        this.operator = operator;
         this.claimed = true;
         this.claimedTime = LocalDateTime.now();
     }
@@ -58,6 +61,7 @@ public class BungeeTicket {
 
 
     public void close() {
+        CustomProxiedPlayerManager.getCustomPlayerFromPlayer(player).removeTicket(this);
         this.claimedTime = null;
         this.message = null;
         this.caseOpeningTime = null;
