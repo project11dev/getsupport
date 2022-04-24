@@ -1,4 +1,5 @@
 storage:
+  #MySQL does not support offline mode as it works with UUIDs
   mysql:
     #put true or false (enable mysql yes or no)
     enable: false

@@ -1,9 +1,11 @@
 package fr.pr11dev.getsupport.bungeecord;
 
+import fr.pr11dev.getsupport.bungeecord.data.BungeeOfflineTicket;
 import fr.pr11dev.getsupport.bungeecord.data.BungeeTicket;
 import fr.pr11dev.getsupport.bungeecord.data.Data;
 import fr.pr11dev.getsupport.bungeecord.manager.Cmd;
 import fr.pr11dev.getsupport.bungeecord.utils.BungeeUpdate;
+import fr.pr11dev.getsupport.bungeecord.manager.Events;
 import fr.pr11dev.getsupport.shared.storage.mysql.MySQL;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -15,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class getsupportBungee extends Plugin {
@@ -28,6 +31,7 @@ public class getsupportBungee extends Plugin {
         getProxy().getConsole().sendMessage("§a[§bGetsupport§a] §bPlugin §aBungeeCord §bactivé !");
         instance = this;
         Cmd.register();
+        Events.register();
 
         new BungeeUpdate(this, 91749).getLastestVersion(version -> {
             if(this.getDescription().getVersion().equals(version)) {
@@ -74,22 +78,20 @@ public class getsupportBungee extends Plugin {
                 e.printStackTrace();
             }
 
-            try {
-                for(String s : MySQL.getValues("tickets")) {
-                    //NullPointerException
-                    //TODO: Fix this
-                    BungeeTicket bt = new BungeeTicket(ProxyServer.getInstance().getPlayer(s), MySQL.getString("tickets", "uuid", s, "message"));
+            for(String s : MySQL.getValues("tickets")) {
+                try {
+                    BungeeOfflineTicket bt = new BungeeOfflineTicket(UUID.fromString(s), MySQL.getString("tickets", "uuid", s, "message"));
                     if(MySQL.getString("tickets", "uuid", s, "claimed").equals("true")) {
-                        bt.claim(ProxyServer.getInstance().getPlayer(MySQL.getString("tickets", "uuid", s, "operator")));
+                        bt.claim(UUID.fromString(MySQL.getString("tickets", "uuid", s, "operator")));
                     }
                 }
+                catch (Exception e) {
+                    getLogger().log(Level.SEVERE, "§a[§bGetsupport§a] Erreur lors de la récupération d'un ticket depuis la base de données MySQL");
+                    e.printStackTrace();
+                }
+            }
                 MySQL.execute("DELETE FROM "+config.getString("storage.mysql.prefix")+"tickets;", false);
                 getLogger().log(Level.INFO, "§a[§bGetsupport§a] §bRécupération des tickets de la base de données réussie!");
-            }
-            catch (Exception e) {
-                getLogger().log(Level.SEVERE, "§a[§bGetsupport§a] Erreur lors de la récupération des tickets depuis la base de données MySQL");
-                e.printStackTrace();
-            }
         }
 
 
@@ -109,6 +111,14 @@ public class getsupportBungee extends Plugin {
                     }
                     else {
                         MySQL.execute("INSERT INTO "+config.getString("storage.mysql.prefix")+"tickets (uuid, message, claimed) VALUES ('"+bt.getPlayer().getUniqueId().toString()+"', '"+bt.getMessage()+"', '"+bt.isClaimed()+"');", false );
+                    }
+                }
+                for(BungeeOfflineTicket bt : Data.offlineTickets) {
+                    if(bt.isClaimed()) {
+                        MySQL.execute("INSERT INTO "+config.getString("storage.mysql.prefix")+"tickets (uuid, message, claimed, operator) VALUES ('"+bt.getUuid()+"', '"+bt.getMessage()+"', '"+bt.isClaimed()+"', '"+bt.getUuid_operator()+"');", false );
+                    }
+                    else {
+                        MySQL.execute("INSERT INTO "+config.getString("storage.mysql.prefix")+"tickets (uuid, message, claimed) VALUES ('"+bt.getUuid()+"', '"+bt.getMessage()+"', '"+bt.isClaimed()+"');", false );
                     }
                 }
                 getLogger().log(Level.INFO, "§a[§bGetsupport§a] §bEnregistrement des tickets dans la base de données réussie!");

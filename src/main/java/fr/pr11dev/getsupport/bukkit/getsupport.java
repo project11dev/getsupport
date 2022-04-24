@@ -1,6 +1,7 @@
 package fr.pr11dev.getsupport.bukkit;
 
 import fr.pr11dev.getsupport.bukkit.data.Data;
+import fr.pr11dev.getsupport.bukkit.data.OfflineTicket;
 import fr.pr11dev.getsupport.bukkit.data.Ticket;
 import fr.pr11dev.getsupport.bukkit.manager.Commands;
 import fr.pr11dev.getsupport.bukkit.utils.Update;
@@ -14,6 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,20 +65,21 @@ public class getsupport extends JavaPlugin {
                 e.printStackTrace();
             }
 
-            try {
-                for(String s : MySQL.getValues("tickets")) {
-                    Ticket t = new Ticket(getServer().getPlayer(s), MySQL.getString("tickets", "uuid", s, "message"));
+            for(String s : MySQL.getValues("tickets")) {
+                try {
+                    OfflineTicket t = new OfflineTicket(UUID.fromString(s), MySQL.getString("tickets", "uuid", s, "message"));
                     if(MySQL.getString("tickets", "uuid", s, "claimed").equals("true")) {
-                        t.claim(getServer().getPlayer(MySQL.getString("tickets", "uuid", s, "operator")));
+                        t.claim(UUID.fromString(MySQL.getString("tickets", "uuid", s, "operator")));
                     }
                 }
+                catch (Exception e) {
+                    getLogger().log(Level.SEVERE, "§c[§6GetSupport§c] §7Erreur lors de la récupération  d'un ticket de la base de données");
+                    e.printStackTrace();
+                }
+            }
                 MySQL.execute("DELETE FROM "+getConfig().getString("storage.mysql.prefix")+"tickets;", false);
                 getLogger().log(Level.INFO, "§c[§6GetSupport§c] §7Récupération des tickets de la base de donnée réussie");
-            }
-            catch (Exception e) {
-                getLogger().log(Level.SEVERE, "§c[§6GetSupport§c] §7Erreur lors de la récupération des tickets de la base de données");
-                e.printStackTrace();
-            }
+
         }
 
         new Metrics(this, 15022);
@@ -93,6 +96,14 @@ public class getsupport extends JavaPlugin {
                     }
                     else {
                         MySQL.execute("INSERT INTO "+getConfig().getString("storage.mysql.prefix")+"tickets (uuid, message, claimed) VALUES ('"+t.getPlayer().getUniqueId().toString()+"', '"+t.getMessage()+"', '"+t.isClaimed()+"');", false );
+                    }
+                }
+                for(OfflineTicket t : Data.offlineTickets) {
+                    if(t.isClaimed()) {
+                        MySQL.execute("INSERT INTO "+getConfig().getString("storage.mysql.prefix")+"tickets (uuid, message, claimed, operator) VALUES ('"+t.getUuid()+"', '"+t.getMessage()+"', '"+t.isClaimed()+"', '"+t.getUuid_operator()+"');", false );
+                    }
+                    else {
+                        MySQL.execute("INSERT INTO "+getConfig().getString("storage.mysql.prefix")+"tickets (uuid, message, claimed) VALUES ('"+t.getUuid()+"', '"+t.getMessage()+"', '"+t.isClaimed()+"');", false );
                     }
                 }
                 getLogger().log(Level.INFO, "§c[§6GetSupport§c] §7Enregistrement des tickets dans la base de données réussie");

@@ -1,0 +1,57 @@
+package fr.pr11dev.getsupport.bukkit.data;
+
+
+import java.util.UUID;
+
+import static org.bukkit.Bukkit.getServer;
+
+public class OfflineTicket {
+    private UUID uuid;
+    private String message;
+    private boolean claimed;
+    private UUID uuid_operator;
+
+    public OfflineTicket(UUID uuid, String message) {
+        this.uuid = uuid;
+        this.message = message;
+        Data.offlineTickets.add(this);
+    }
+
+    public void claim(UUID uuid_operator) {
+        claimed = true;
+        this.uuid_operator = uuid_operator;
+    }
+
+    public Ticket getTicket() {
+        Ticket t  = new Ticket(getServer().getPlayer(uuid), message);
+        if(claimed) {
+            t.claim(getServer().getPlayer(uuid_operator));
+        }
+
+        return t;
+    }
+
+    public void remove() {
+        Data.offlineTickets.remove(this);
+        this.uuid = null;
+        this.message = null;
+        this.claimed = false;
+        this.uuid_operator = null;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public boolean isClaimed() {
+        return claimed;
+    }
+
+    public UUID getUuid_operator() {
+        return uuid_operator;
+    }
+    public UUID getUuid() {
+        return uuid;
+    }
+
+}
