@@ -58,12 +58,22 @@ public class getsupportBungee extends Plugin {
             MySQL.connect(config.getString("storage.mysql.db"), config.getString("storage.mysql.ip"), config.getString("storage.mysql.user"), config.getString("storage.mysql.pass"), config.getString("storage.mysql.prefix"));
 
             try {
+                MySQL.execute("CREATE DATABASE IF NOT EXISTS "+config.getString("storage.mysql.db")+";",true);
+                MySQL.execute("CREATE TABLE IF NOT EXISTS "+config.getString("storage.mysql.db")+"."+config.getString("storage.mysql.prefix")+"tickets (uuid VARCHAR(255), message VARCHAR(255), claimed BOOLEAN, operator VARCHAR(255));",true);
+
+            }
+            catch (Exception e) {
+                getLogger().log(Level.SEVERE,"§c[§6GetSupport§c] §7Erreur lors de la création de la base de données");
+            }
+
+            try {
                 for(String s : MySQL.getValues("tickets")) {
                     BungeeTicket bt = new BungeeTicket(ProxyServer.getInstance().getPlayer(s), MySQL.getString("tickets", "uuid", s, "message"));
                     if(MySQL.getString("tickets", "uuid", s, "claimed").equals("true")) {
                         bt.claim(ProxyServer.getInstance().getPlayer(MySQL.getString("tickets", "uuid", s, "operator")));
                     }
                 }
+                MySQL.execute("DELETE FROM tickets;", true);
             }
             catch (Exception e) {
                 getLogger().log(Level.SEVERE, "§a[§bGetsupport§a] Erreur lors de la récupération des tickets depuis la base de données MySQL");
