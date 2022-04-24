@@ -7,6 +7,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
+import java.util.logging.Level;
+
+import static org.bukkit.Bukkit.getLogger;
 import static org.bukkit.Bukkit.getServer;
 
 public class PlayerJoin implements Listener {
@@ -18,6 +21,8 @@ public class PlayerJoin implements Listener {
                     if(ot.isClaimed()) {
                         t.claim(getServer().getPlayer(ot.getUuid_operator()));
                     }
+                    t.getPlayer().sendMessage("§a[§bGetsupport§a] §Un ancien ticket vous appartenant a été récupéré.");
+                    getLogger().log(Level.INFO, "Le ticket de "+t.getPlayer().getDisplayName()+" a été récupéré");
                     ot.remove();
                     return;
 

@@ -8,6 +8,8 @@ import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
+import java.util.logging.Level;
+
 public class PlayerJoin implements Listener {
     @EventHandler
     public void PlayerJoinEvent(ServerConnectEvent e) {
@@ -17,6 +19,8 @@ public class PlayerJoin implements Listener {
                 if(bot.isClaimed()) {
                     t.claim(ProxyServer.getInstance().getPlayer(bot.getUuid_operator()));
                 }
+                t.getPlayer().sendMessage("§a[§bGetsupport§a] §Un ancien ticket vous appartenant a été récupéré.");
+                ProxyServer.getInstance().getLogger().log(Level.INFO, "Le ticket de "+t.getPlayer().getDisplayName()+" a été récupéré");
                 bot.remove();
                 return;
             }
