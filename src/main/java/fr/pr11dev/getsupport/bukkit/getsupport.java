@@ -44,20 +44,23 @@ public class getsupport extends JavaPlugin {
         if(getConfig().getBoolean("storage.mysql.enable")) {
 
             try {
-            MySQL.connect(getConfig().getString("storage.mysql.db"), getConfig().getString("storage.mysql.ip"), getConfig().getString("storage.mysql.user"), getConfig().getString("storage.mysql.pass"), getConfig().getString("storage.mysql.prefix"));
+                MySQL.connect(getConfig().getString("storage.mysql.db"), getConfig().getString("storage.mysql.ip"), getConfig().getString("storage.mysql.user"), getConfig().getString("storage.mysql.pass"), getConfig().getString("storage.mysql.prefix"));
+                getLogger().log(Level.INFO, "§c[§6GetSupport§c] §7Connexion à la base de données réussie");
             }
             catch (Exception e) {
                 getLogger().log(Level.SEVERE, "§c[§6GetSupport§c] §7Erreur lors de la connexion à la base de données");
+                e.printStackTrace();
             }
 
 
             try {
-                MySQL.execute("CREATE DATABASE IF NOT EXISTS "+getConfig().getString("storage.mysql.db")+";",true);
-                MySQL.execute("CREATE TABLE IF NOT EXISTS "+getConfig().getString("storage.mysql.db")+"."+getConfig().getString("storage.mysql.prefix")+"tickets (uuid VARCHAR(255), message VARCHAR(255), claimed BOOLEAN, operator VARCHAR(255));",true);
-
+                MySQL.execute("CREATE DATABASE IF NOT EXISTS "+getConfig().getString("storage.mysql.db")+";",false);
+                MySQL.execute("CREATE TABLE IF NOT EXISTS "+getConfig().getString("storage.mysql.db")+"."+getConfig().getString("storage.mysql.prefix")+"tickets (uuid VARCHAR(255), message VARCHAR(255), claimed VARCHAR(36), operator VARCHAR(255));",false);
+                getLogger().log(Level.INFO, "§c[§6GetSupport§c] §7Vérification de la base de données réussie");
             }
             catch (Exception e) {
                 getLogger().log(Level.SEVERE,"§c[§6GetSupport§c] §7Erreur lors de la création de la base de données");
+                e.printStackTrace();
             }
 
             try {
@@ -67,10 +70,12 @@ public class getsupport extends JavaPlugin {
                         t.claim(getServer().getPlayer(MySQL.getString("tickets", "uuid", s, "operator")));
                     }
                 }
-                MySQL.execute("DELETE FROM tickets;", true);
+                MySQL.execute("DELETE FROM "+getConfig().getString("storage.mysql.prefix")+"tickets;", false);
+                getLogger().log(Level.INFO, "§c[§6GetSupport§c] §7Récupération des tickets de la base de donnée réussie");
             }
             catch (Exception e) {
                 getLogger().log(Level.SEVERE, "§c[§6GetSupport§c] §7Erreur lors de la récupération des tickets de la base de données");
+                e.printStackTrace();
             }
         }
 
@@ -83,11 +88,18 @@ public class getsupport extends JavaPlugin {
         if(getConfig().getBoolean("storage.mysql.enable")) {
             try {
                 for(Ticket t: Data.tickets) {
-                    MySQL.execute("INSERT INTO tickets (uuid, message, claimed, operator) VALUES ('"+t.getPlayer().getUniqueId().toString()+"', '"+t.getMessage()+"', '"+t.isClaimed()+"', '"+t.getOperator().getUniqueId().toString()+"');", true );
+                    if(t.isClaimed()) {
+                        MySQL.execute("INSERT INTO "+getConfig().getString("storage.mysql.prefix")+"tickets (uuid, message, claimed, operator) VALUES ('"+t.getPlayer().getUniqueId().toString()+"', '"+t.getMessage()+"', '"+t.isClaimed()+"', '"+t.getOperator().getUniqueId().toString()+"');", false );
+                    }
+                    else {
+                        MySQL.execute("INSERT INTO "+getConfig().getString("storage.mysql.prefix")+"tickets (uuid, message, claimed) VALUES ('"+t.getPlayer().getUniqueId().toString()+"', '"+t.getMessage()+"', '"+t.isClaimed()+"');", false );
+                    }
                 }
+                getLogger().log(Level.INFO, "§c[§6GetSupport§c] §7Enregistrement des tickets dans la base de données réussie");
             }
             catch (Exception e) {
                 getLogger().log(Level.SEVERE, "§c[§6GetSupport§c] §7Erreur lors de la sauvegarde des tickets");
+                e.printStackTrace();
             }
         }
     }
