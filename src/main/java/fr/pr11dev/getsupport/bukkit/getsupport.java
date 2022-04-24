@@ -42,8 +42,23 @@ public class getsupport extends JavaPlugin {
         }
 
         if(getConfig().getBoolean("storage.mysql.enable")) {
-            MySQL.connect(getConfig().getString("storage.mysql.db"), getConfig().getString("storage.mysql.ip"), getConfig().getString("storage.mysql.user"), getConfig().getString("storage.mysql.pass"), getConfig().getString("storage.mysql.prefix"));
 
+            try {
+            MySQL.connect(getConfig().getString("storage.mysql.db"), getConfig().getString("storage.mysql.ip"), getConfig().getString("storage.mysql.user"), getConfig().getString("storage.mysql.pass"), getConfig().getString("storage.mysql.prefix"));
+            }
+            catch (Exception e) {
+                getLogger().log(Level.SEVERE, "§c[§6GetSupport§c] §7Erreur lors de la connexion à la base de données");
+            }
+
+
+            try {
+                MySQL.execute("CREATE DATABASE IF NOT EXISTS "+getConfig().getString("storage.mysql.db")+";",true);
+                MySQL.execute("CREATE TABLE IF NOT EXISTS "+getConfig().getString("storage.mysql.db")+"."+getConfig().getString("storage.mysql.prefix")+"tickets (uuid VARCHAR(255), message VARCHAR(255), claimed BOOLEAN, operator VARCHAR(255));",true);
+
+            }
+            catch (Exception e) {
+                getLogger().log(Level.SEVERE,"§c[§6GetSupport§c] §7Erreur lors de la création de la base de données");
+            }
 
             try {
                 for(String s : MySQL.getValues("tickets")) {
@@ -52,9 +67,10 @@ public class getsupport extends JavaPlugin {
                         t.claim(getServer().getPlayer(MySQL.getString("tickets", "uuid", s, "operator")));
                     }
                 }
+                MySQL.execute("DELETE FROM tickets;", true);
             }
             catch (Exception e) {
-                getLogger().log(Level.SEVERE, "§c[§6GetSupport§c] §7Erreur lors de la connexion à la base de données");
+                getLogger().log(Level.SEVERE, "§c[§6GetSupport§c] §7Erreur lors de la récupération des tickets de la base de données");
             }
         }
 
@@ -67,7 +83,7 @@ public class getsupport extends JavaPlugin {
         if(getConfig().getBoolean("storage.mysql.enable")) {
             try {
                 for(Ticket t: Data.tickets) {
-                    MySQL.execute("INSERT INTO tickets (uuid, message, claimed, operator) VALUES ('"+t.getPlayer().getUniqueId().toString()+"', '"+t.getMessage()+"', '"+t.isClaimed()+"', '"+t.getOperator().getUniqueId().toString()+"')", true );
+                    MySQL.execute("INSERT INTO tickets (uuid, message, claimed, operator) VALUES ('"+t.getPlayer().getUniqueId().toString()+"', '"+t.getMessage()+"', '"+t.isClaimed()+"', '"+t.getOperator().getUniqueId().toString()+"');", true );
                 }
             }
             catch (Exception e) {
