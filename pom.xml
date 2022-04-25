@@ -95,6 +95,10 @@
             <id>bungeecord-repo</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -129,6 +133,11 @@
             <artifactId>bstats-bungeecord</artifactId>
             <version>3.0.0</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>fr.project11dev.getsupport</groupId>
+            <artifactId>getsupport</artifactId>
+            <version>0.1.2</version>
         </dependency>
     </dependencies>
 </project>
