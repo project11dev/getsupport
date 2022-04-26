@@ -90,7 +90,7 @@ public class DataManagement {
                         MySQL.execute("INSERT INTO "+getsupport.getInstance().getConfig().getString("storage.mysql.prefix")+"tickets (uuid, message, claimed) VALUES ('"+t.getUuid()+"', '"+t.getMessage()+"', '"+t.isClaimed()+"');", false );
                     }
                 }
-                getLogger().log(Level.INFO, "§c[§6GetSupport§c] §7Enregistrement des tickets dans la base de données réussie");
+                getLogger().log(Level.INFO, "§c[§6GetSupport§c] §7L'enregistrement des tickets dans la base de données a été réussi");
             }
             catch (Exception e) {
                 getLogger().log(Level.SEVERE, "§c[§6GetSupport§c] §7Erreur lors de la sauvegarde des tickets");
@@ -104,15 +104,19 @@ public class DataManagement {
                     json.setString(t.getTicketId() + ".player", t.getPlayer().getUniqueId().toString());
                     json.setString(t.getTicketId() + ".message", t.getMessage());
                     json.setString(t.getTicketId() + ".claimed", t.isClaimed() + "");
-                    json.setString(t.getTicketId() + ".operator", t.getOperator().getUniqueId().toString());
+                    if(t.isClaimed()) {
+                        json.setString(t.getTicketId() + ".operator", t.getOperator().getUniqueId().toString());
+                    }
                 }
                 for(OfflineTicket t : Data.offlineTickets) {
                     json.setString(t.getTicketId() + ".player", t.getUuid().toString());
                     json.setString(t.getTicketId() + ".message", t.getMessage());
                     json.setString(t.getTicketId() + ".claimed", t.isClaimed() + "");
-                    json.setString(t.getTicketId() + ".operator", t.getUuid_operator().toString());
+                    if(t.isClaimed()) {
+                        json.setString(t.getTicketId() + ".operator", t.getUuid_operator().toString());
+                    }
                 }
-                getLogger().log(Level.INFO, "§c[§6GetSupport§c] §7Enregistrement des tickets dans le fichier json réussie");
+                getLogger().log(Level.INFO, "§c[§6GetSupport§c] §7L'e nregistrement des tickets dans le fichier json a été réussi");
             }
             catch (Exception e) {
                 getLogger().log(Level.SEVERE, "§c[§6GetSupport§c] §7Erreur lors de la sauvegarde des tickets");

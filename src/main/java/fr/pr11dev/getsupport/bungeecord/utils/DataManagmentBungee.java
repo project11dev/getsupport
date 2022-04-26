@@ -10,8 +10,6 @@ import fr.pr11dev.getsupport.shared.storage.mysql.MySQL;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import static org.bukkit.Bukkit.getLogger;
-
 public class DataManagmentBungee {
     public static void load() {
         if(getsupportBungee.getInstance().config.getBoolean("storage.mysql.enable")) {
@@ -60,12 +58,12 @@ public class DataManagmentBungee {
                     }
                 }
                 catch (Exception e) {
-                    getLogger().log(Level.SEVERE, "§c[§6GetSupport§c] §7Erreur lors de la récupération  d'un ticket de la base de données");
+                    getsupportBungee.getInstance().getLogger().log(Level.SEVERE, "§c[§6GetSupport§c] §7Erreur lors de la récupération  d'un ticket de la base de données");
                     e.printStackTrace();
                 }
             }
             json.clear();
-            getLogger().log(Level.INFO, "§c[§6GetSupport§c] §7Récupération des tickets de la base de donnée réussie");
+            getsupportBungee.getInstance().getLogger().log(Level.INFO, "§c[§6GetSupport§c] §7Récupération des tickets de la base de donnée réussie");
         }
     }
 
@@ -88,10 +86,10 @@ public class DataManagmentBungee {
                         MySQL.execute("INSERT INTO "+getsupportBungee.getInstance().config.getString("storage.mysql.prefix")+"tickets (uuid, message, claimed) VALUES ('"+bt.getUuid()+"', '"+bt.getMessage()+"', '"+bt.isClaimed()+"');", false );
                     }
                 }
-                getLogger().log(Level.INFO, "§a[§bGetsupport§a] §bEnregistrement des tickets dans la base de données réussie!");
+                getsupportBungee.getInstance().getLogger().log(Level.INFO, "§a[§bGetsupport§a] §bL'enregistrement des tickets dans la base de données a été réussi!");
             }
             catch (Exception e) {
-                getLogger().log(Level.SEVERE, "§a[§bGetsupport§a] Impossible de sauvegarder les tickets dans la base de données MySQL");
+                getsupportBungee.getInstance().getLogger().log(Level.SEVERE, "§a[§bGetsupport§a] Impossible de sauvegarder les tickets dans la base de données MySQL");
                 e.printStackTrace();
             }
         }
@@ -102,18 +100,22 @@ public class DataManagmentBungee {
                     json.setString(t.getTicketId() + ".player", t.getPlayer().getUniqueId().toString());
                     json.setString(t.getTicketId() + ".message", t.getMessage());
                     json.setString(t.getTicketId() + ".claimed", t.isClaimed() + "");
-                    json.setString(t.getTicketId() + ".operator", t.getOperator().getUniqueId().toString());
+                    if(t.isClaimed()) {
+                        json.setString(t.getTicketId() + ".operator", t.getOperator().getUniqueId().toString());
+                    }
                 }
                 for(BungeeOfflineTicket t : Data.offlineTickets) {
                     json.setString(t.getTicketId() + ".player", t.getUuid().toString());
                     json.setString(t.getTicketId() + ".message", t.getMessage());
                     json.setString(t.getTicketId() + ".claimed", t.isClaimed() + "");
-                    json.setString(t.getTicketId() + ".operator", t.getUuid_operator().toString());
+                    if(t.isClaimed()) {
+                        json.setString(t.getTicketId() + ".operator", t.getUuid_operator().toString());
+                    }
                 }
-                getLogger().log(Level.INFO, "§c[§6GetSupport§c] §7Enregistrement des tickets dans le fichier json réussie");
+                getsupportBungee.getInstance().getLogger().log(Level.INFO, "§c[§6GetSupport§c] §7L'enregistrement des tickets dans le fichier json a été réussi");
             }
             catch (Exception e) {
-                getLogger().log(Level.SEVERE, "§c[§6GetSupport§c] §7Erreur lors de la sauvegarde des tickets");
+                getsupportBungee.getInstance().getLogger().log(Level.SEVERE, "§c[§6GetSupport§c] §7Erreur lors de la sauvegarde des tickets");
                 e.printStackTrace();
             }
         }

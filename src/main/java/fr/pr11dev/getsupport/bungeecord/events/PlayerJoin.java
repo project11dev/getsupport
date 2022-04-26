@@ -15,13 +15,10 @@ public class PlayerJoin implements Listener {
     public void PlayerJoinEvent(ServerConnectEvent e) {
         for(BungeeOfflineTicket bot : Data.offlineTickets) {
             if(bot.getUuid().equals(e.getPlayer().getUniqueId())){
-                final BungeeTicket t = new BungeeTicket(ProxyServer.getInstance().getPlayer(bot.getUuid()), bot.getMessage());
-                if(bot.isClaimed()) {
-                    t.claim(ProxyServer.getInstance().getPlayer(bot.getUuid_operator()));
-                }
+                BungeeTicket t = bot.getTicket();
+                bot.remove();
                 t.getPlayer().sendMessage("§a[§bGetsupport§a] §Un ancien ticket vous appartenant a été récupéré.");
                 ProxyServer.getInstance().getLogger().log(Level.INFO, "Le ticket de "+t.getPlayer().getDisplayName()+" a été récupéré");
-                bot.remove();
                 return;
             }
         }
