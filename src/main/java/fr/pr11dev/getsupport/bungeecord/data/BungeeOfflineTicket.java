@@ -9,10 +9,12 @@ public class BungeeOfflineTicket {
     private String message;
     private boolean claimed;
     private UUID uuid_operator;
+    private String ticketId;
 
     public BungeeOfflineTicket(UUID uuid, String message) {
         this.uuid = uuid;
         this.message = message;
+        this.ticketId = uuid + "_" + message + "_" + UUID.randomUUID();
         Data.offlineTickets.add(this);
     }
 
@@ -49,8 +51,13 @@ public class BungeeOfflineTicket {
     public UUID getUuid_operator() {
         return uuid_operator;
     }
+
     public UUID getUuid() {
         return uuid;
+    }
+
+    public String getTicketId() {
+        return ticketId;
     }
 
 }

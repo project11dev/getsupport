@@ -6,6 +6,7 @@ import fr.pr11dev.getsupport.bungeecord.data.Data;
 import fr.pr11dev.getsupport.bungeecord.manager.Cmd;
 import fr.pr11dev.getsupport.bungeecord.utils.BungeeUpdate;
 import fr.pr11dev.getsupport.bungeecord.manager.Events;
+import fr.pr11dev.getsupport.bungeecord.utils.DataManagmentBungee;
 import fr.pr11dev.getsupport.shared.storage.mysql.MySQL;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -23,7 +24,7 @@ import java.util.logging.Level;
 public class getsupportBungee extends Plugin {
 
 
-    private Configuration config;
+    public Configuration config;
     static getsupportBungee instance;
 
     @Override
@@ -58,76 +59,15 @@ public class getsupportBungee extends Plugin {
             e.printStackTrace();
         }
 
-        if(config.getBoolean("storage.mysql.enable")) {
-            try {
-                MySQL.connect(config.getString("storage.mysql.db"), config.getString("storage.mysql.ip"), config.getString("storage.mysql.user"), config.getString("storage.mysql.pass"), config.getString("storage.mysql.prefix"));
-                getLogger().log(Level.INFO, "§a[§bGetsupport§a] §bConnexion à la base de donnée réussie !");
-            }
-            catch (Exception e) {
-                getLogger().log(Level.SEVERE, "§c[§bGetsupport§c] §cImpossible de se connecter à la base de donnée !");
-                e.printStackTrace();
-            }
-
-            try {
-                MySQL.execute("CREATE DATABASE IF NOT EXISTS "+config.getString("storage.mysql.db")+";",false);
-                MySQL.execute("CREATE TABLE IF NOT EXISTS "+config.getString("storage.mysql.db")+"."+config.getString("storage.mysql.prefix")+"tickets (uuid VARCHAR(255), message VARCHAR(255), claimed VARCHAR(36), operator VARCHAR(255));",false);
-                getLogger().log(Level.INFO, "§a[§bGetsupport§a] §bVérification de la base de donnée réussie !");
-            }
-            catch (Exception e) {
-                getLogger().log(Level.SEVERE,"§c[§6GetSupport§c] §7Erreur lors de la création de la base de données");
-                e.printStackTrace();
-            }
-
-            for(String s : MySQL.getValues("tickets")) {
-                try {
-                    BungeeOfflineTicket bt = new BungeeOfflineTicket(UUID.fromString(s), MySQL.getString("tickets", "uuid", s, "message"));
-                    if(MySQL.getString("tickets", "uuid", s, "claimed").equals("true")) {
-                        bt.claim(UUID.fromString(MySQL.getString("tickets", "uuid", s, "operator")));
-                    }
-                }
-                catch (Exception e) {
-                    getLogger().log(Level.SEVERE, "§a[§bGetsupport§a] Erreur lors de la récupération d'un ticket depuis la base de données MySQL");
-                    e.printStackTrace();
-                }
-            }
-                MySQL.execute("DELETE FROM "+config.getString("storage.mysql.prefix")+"tickets;", false);
-                getLogger().log(Level.INFO, "§a[§bGetsupport§a] §bRécupération des tickets de la base de données réussie!");
-        }
-
+        DataManagmentBungee.load();
 
         new Metrics(this, 15023);
     }
 
     @Override
     public void onDisable() {
+        DataManagmentBungee.save();
         getProxy().getConsole().sendMessage("§a[§bGetsupport§a] §bPlugin §aBungeeCord §bdesactivé !");
-
-
-        if(config.getBoolean("storage.mysql.enable")) {
-            try {
-                for(BungeeTicket bt : Data.tickets) {
-                    if(bt.isClaimed()) {
-                        MySQL.execute("INSERT INTO "+config.getString("storage.mysql.prefix")+"tickets (uuid, message, claimed, operator) VALUES ('"+bt.getPlayer().getUniqueId().toString()+"', '"+bt.getMessage()+"', '"+bt.isClaimed()+"', '"+bt.getOperator().getUniqueId().toString()+"');", false );
-                    }
-                    else {
-                        MySQL.execute("INSERT INTO "+config.getString("storage.mysql.prefix")+"tickets (uuid, message, claimed) VALUES ('"+bt.getPlayer().getUniqueId().toString()+"', '"+bt.getMessage()+"', '"+bt.isClaimed()+"');", false );
-                    }
-                }
-                for(BungeeOfflineTicket bt : Data.offlineTickets) {
-                    if(bt.isClaimed()) {
-                        MySQL.execute("INSERT INTO "+config.getString("storage.mysql.prefix")+"tickets (uuid, message, claimed, operator) VALUES ('"+bt.getUuid()+"', '"+bt.getMessage()+"', '"+bt.isClaimed()+"', '"+bt.getUuid_operator()+"');", false );
-                    }
-                    else {
-                        MySQL.execute("INSERT INTO "+config.getString("storage.mysql.prefix")+"tickets (uuid, message, claimed) VALUES ('"+bt.getUuid()+"', '"+bt.getMessage()+"', '"+bt.isClaimed()+"');", false );
-                    }
-                }
-                getLogger().log(Level.INFO, "§a[§bGetsupport§a] §bEnregistrement des tickets dans la base de données réussie!");
-            }
-            catch (Exception e) {
-                getLogger().log(Level.SEVERE, "§a[§bGetsupport§a] Impossible de sauvegarder les tickets dans la base de données MySQL");
-                e.printStackTrace();
-            }
-        }
     }
 
     public static getsupportBungee getInstance() {
